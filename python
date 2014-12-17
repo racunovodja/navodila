@@ -1,0 +1,14 @@
+ZAGON PROGRAMA DIREKTNO IZ LINUX TERMINALA : python vaja1.py ali python ./DIREKTORIJ/vaja1.py
+
+ZAGON PROGRAMA IZ PYTHONA >>> execfile('cena_krompirja.py')
+ali pa z >>> import cena_krompirja
+
+
+iz ukazne vrstice zaženemo program tako, da najprej naložimo fail naprimer fibo.py file tako >>> import fibo in potem funkcijo naprimer fib2  z ukazom fibo.fib2
+
+raziskujemo baze : primeri
+najprej v python uvozimo model z : from polls.models import Anketa
+Anketa.objects.all()   prikaže vse vrstice
+Anketa.objects.filter(id=1)   prikaže vrstico z id=1
+Anketa.objects.filter(vprasanje__startswith='kaj') prikaže vrstico v stolpcu vprasanje, ki se začne s kaj	
+Anketa.objects.get(pk=1)  prikaže polje s primarnim ključem 	

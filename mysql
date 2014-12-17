@@ -1,0 +1,194 @@
+mysql moja verzija 5.5.34-Oubuntu0.12.04.1
+
+osnovna (dobra) navodila so na strani http://dev.mysql.com/tech-resources/articles/mysql_intro.html
+
+CREATE USER 'vasja'@'localhost' IDENTIFIED BY '123';
+sem dodal uporabnika: vasja  geslo:123 ,
+in CREATE USER 'rados'@'localhost' IDENTIFIED BY '123';
+guest z geslom :guest123 pa je vnešen z ukazi, ki mu dajejo pravice SELECT, INSERT and UPDATE
+root@host# mysql -u root -p
+Enter password:*******
+mysql> use mysql;
+Database changed
+
+mysql> INSERT INTO user 
+          (host, user, password, 
+           select_priv, insert_priv, update_priv) 
+           VALUES ('localhost', 'guest', 
+podrobnosti na strani http://www.tutorialspoint.com/mysql/mysql-administration.htm
+
+vstop na userja je mysql -u vasja -p  in potem vneseš geslo
+mysql -u root -p    vstop na vse nivoje
+SHOW DATABASES; na root privilegiju pogledam baze, ki so na razpolago, test, mysql,..tudi bazavaja, ki sem jo dodal s CREATE DATABASE;
+uporabnik vasja vidi le bazo test, uporabnika root in guest pa vse baze, ker imajo druge privilegije
+GRANT ALL ON bazavaja.* TO 'vasja'@'localhost';  no sedaj sem vasji dal pravice tudi do baze bazavaja
+TUDI NA TAK NAČIN BI ŠLO
+root@host# mysql -u root -p password;GRANT ALL ON bazavaja.* TO 'vasja'@'localhost'; 
+Enter password:*******
+mysql> use bazavaja;mysqladmin -u root password NEWPASSWORD
+Database changed
+
+mysql> GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP
+    -> ON vaja.*
+    -> TO 'rados'@'localhost'
+    -> IDENTIFIED BY '123';
+
+na tem naslovu je tabela privelegijev, ki jih lahko dodeliš uporabniku
+
+SHOW GRANTS FOR 'vasja'@'localhost'; s tem ukazom dobim pregled nad pravicami
+
+
+DROP USER 'guest'@'localhost'; s tem ukazom sem zbrisal uporabnika guest
+
+
+pogosti in pomembni ukazi
+
+
+
+    USE Databasename : This will be used to select a particular database in MySQL workarea.
+
+    SHOW DATABASES: Lists the databases that are accessible by the MySQL DBMS.
+
+    SHOW TABLES: Shows the tables in the database once a database has been selected with the use command.
+
+    SHOW COLUMNS FROM tablename: Shows the attributes, types of attributes, key information, whether NULL is permitted, defaults, and other information for a table.
+
+    SHOW INDEX FROM tablename: Presents the details of all indexes on the table, including the PRIMARY KEY.
+
+    SHOW TABLE STATUS LIKE tablename\G: Reports details of the MySQL DBMS performance and statistics.
+
+    DELETE FROM osebe WHERE id=1;  primer brisanja vrstice z id=0 iz tabele osebe	
+
+
+LOAD DATA INFILE 'pet.txt' INTO TABLE pet; uvoz tabele. Pet.txt mora biti v /var/lib/mysql/vaja(baza)/pet.txt
+LOAD DATA LOCAL INFILE 'pet.txt' INTO TABLE pet;
+
+
+mysql> INSERT INTO pet
+    -> VALUES ('Puffball','Diane','hamster','f','1999-03-30',NULL);
+
+root@mojracunalnik:/var/lib/mysql/vaja# mysql -u rados -p vaja < primer   to je primer kako zaženemo neko komando direktno iz linuxa. Komanada je shranjena v fileu primer. mysql> source primer;
+
+
+iz  mysql a pa na sledeči način   mysql> source primer; ali pa s komando  mysql> \. filename
+
+
+ALTER TABLE Syntax
+
+V TABELI OSEBE SMO DODALI KOLONO KRAJ IN KOLNI IME DALI PRIMARNI KLJUČ
+
+dodajanje kolone v tabelo :mysql> ALTER TABLE osebe ADD COLUMN kraj VARCHAR(10);
+oziroma brez COLUMN mysql> ALTER TABLE osebe ADD naslov VARCHAR(10);
+dodajanje primarnega kluča:mysql> ALTER TABLE osebe ADD PRIMARY KEY(ime);
+
+SPREMINJANJE IMENA STOLPCA :
+kraj v prebivalisce
+mysql> ALTER TABLE osebe CHANGE kraj prebivalisce VARCHAR(20);
+
+BRISANJE KOLONE :
+mysql> ALTER TABLE osebe DROP prebivalisce;
+
+PREIMENOVANJE TABELE :
+mysql > ALTER TABLE osebe RENAME TO oseba;
+
+
+
+
+
+mysql> SELECT DATABASE();
++------------+
+| DATABASE() |
++------------+
+| menagerie  |
++------------+
+
+mysql> SHOW TABLES;
++---------------------+
+| Tables_in_menagerie |
++---------------------+
+| event               |
+| pet                 |
++---------------------
+mysql> DESCRIBE pet;
++---------+-------------+------+-----+---------+-------+
+| Field   | Type        | Null | Key | Default | Extra |
++---------+-------------+------+-----+---------+-------+
+| name    | varchar(20) | YES  |     | NULL    |       |
+| owner   | varchar(20) | YES  |     | NULL    |       |
+| species | varchar(20) | YES  |     | NULL    |       |
+| sex     | char(1)     | YES  |     | NULL    |       |
+| birth   | date        | YES  |     | NULL    |       |
+| death   | date        | YES  |     | NULL    |       |
++---------+-------------+------+-----+---------+-------+
+
+mysql> SELECT * FROM Writers;
++----+-------------------+
+| Id | Name              |
++----+-------------------+
+|  1 | Jack London       |
+|  2 | Honore de Balzac  |
+|  3 | Lion Feuchtwanger |
+|  4 | Emile Zola        |
+|  5 | Truman Capote     |
++----+-------------------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT * FROM pet WHERE (species = 'cat' AND sex = 'm')
+-> OR (species = 'dog' AND sex = 'f');
++-------+--------+---------+------+------------+-------+
+| name | owner | species | sex | birth
+| death |
++-------+--------+---------+------+------------+-------+
+| Claws | Gwen
+| cat
+| m
+| 1994-03-17 | NULL |
+| Buffy | Harold | dog
+| f
+| 1989-05-13 | NULL |
++-------+--------+---------+------+------------+-------+
+
+
+SLOVENŠČINA
+
+ZA UVOZ FILEA V TABELO UPORABI : mysql> LOAD DATA INFILE 'hec'INTO TABLE hec  CHARACTER SET UTF8;
+to deluje
+
+
+ZA GENERALNO NASTAVITEV PA MOGOČE:
+
+iz spleta :Jaz vedno dam naslednje vrstice v /ect/mysql/my.cnf in deluje.(tako pravi)
+
+[client]
+default-character-set = utf8
+
+[mysqld]
+
+character-set-server=utf8
+collation-server=utf8_unicode_ci
+init_connect='set collation_connection = utf8_unicode_ci;'
+
+
+PRIMER UPORABE DVEH TABEL:
+
+mysql> SELECT analiza.*,elementi.* FROM analiza, elementi WHERE analiza.element=elementi.oznaka;
++---------+----------+----------+--------+--------------------+------------+-------+------+
+| element | kolicina | art      | oznaka | opis               | dobavitelj | enota | masa |
++---------+----------+----------+--------+--------------------+------------+-------+------+
+| opeka   |    12.00 | A100.300 | opeka  | OPEKA TAKO         | goriske    | kom   | 2    |
+| KV      |     3.50 | DELO100  | KV     | KVALIFICIRAN ZIDAR | MEGRA      | URA   | 0    |
++---------+----------+----------+--------+--------------------+------------+-------+------+
+2 rows in set (0.00 sec)
+
+TUDI TAKO,
+
+
+mysql> SELECT analiza.element,kolicina,masa,enota,opis FROM analiza INNER JOIN elementi   ON analiza.element=elementi.oznaka WHERE elementi.dobavitelj IS NOT NULL;
++---------+----------+------+-------+--------------------+
+| element | kolicina | masa | enota | opis               |
++---------+----------+------+-------+--------------------+
+| opeka   |    12.00 | 2    | kom   | OPEKA TAKO         |
+| KV      |     3.50 | 0    | URA   | KVALIFICIRAN ZIDAR |
++---------+----------+------+-------+--------------------+
+2 rows in set (0.00 sec)
+

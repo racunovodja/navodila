@@ -1,0 +1,186 @@
+
+How to use Django with Apache and mod_wsgi
+
+Deploying Django with Apache and mod_wsgi is a tried and tested way to get Django into production.
+
+mod_wsgi is an Apache module which can host any Python WSGI application, including Django. Django will work with any version of Apache which supports mod_wsgi.
+
+The official mod_wsgi documentation is fantastic; it’s your source for all the details about how to use mod_wsgi. You’ll probably want to start with the installation and configuration documentation.
+Basic configuration
+
+Once you’ve got mod_wsgi installed and activated, edit your Apache server’s httpd.conf file and add the following. If you are using a version of Apache older than 2.4, replace Require all granted with Allow from all.
+
+WSGIScriptAlias / /path/to/mysite.com/mysite/wsgi.py
+WSGIPythonPath /path/to/mysite.com
+
+<Directory /path/to/mysite.com/mysite>
+<Files wsgi.py>
+Order deny,allow
+Require all granted
+</Files>
+</Directory>
+
+
+
+
+INSTALIRALI SMO SERVER 12.04 IN NALOŽILI PROGRAME SSH(POVEZAVA S CLIENTOM) IN LAMP
+
+1. naložimo na apache mod_wsgi :sudo aptitude install libapache2-mod-wsgi
+2. restartamo apache2 :sudo service apache2 restart
+3. naložimo program pip za enostavno instalacijo Djanga :sudo apt-get install python-pip
+4. s programom pip instaliramo Django :sudo pip install Django
+5. zaženemo še modul za sinhronizacijo mysql s pythonom : $ sudo apt-get install python-mysqldb
+
+Django začetek :
+(večina komand deluje na nivoju fajla 
+1. ustvarimo projekt mysite : django-admin.py startproject mysite
+   zunanji direktorij mysite lahko preimenujemo, za django je pomemben notranji
+2. ustvarimo aplikacijo kalkulacije: python manage.py startapp kalkulacije
+3. kreiramo model v fajlu kalkulacije/models.py
+	from django.db import models
+	class Reporter(models.Model):
+		full_name = models.CharField(max_length=70)
+		# On Python 3: def __str__(self):
+		def __unicode__(self):
+			return self.full_name
+	class Article(models.Model):
+		pub_date = models.DateField()
+		headline = models.CharField(max_length=200)
+		content = models.TextField()
+		reporter = models.ForeignKey(Reporter)
+		# On Python 3: def __str__(self):
+		def __unicode__(self):
+			return self.headline
+4. ustvarimo bazo :python manage.py syncdb
+	Kje je baza ? Napravil je bazo za sqlite3 zraven direktorija mysite.
+        Če hočem uporabiti bazo 'test' iz baze mysql na naslovu /var/lib/mysql/test, moram v 
+        fajlu mysite/settings.py nastaviti :
+
+	DATABASES = {
+	    'default': {
+	        'ENGINE': 'django.db.backends.mysql',
+	        'NAME': 'test',
+	        'USER': 'root',
+	        'PASSWORD': 'rolu9255',
+	        'HOST': 'localhost',
+	        'PORT': '',
+	    }
+	}
+
+	Sedaj zaženem : python manage.py syncdb  in generira potrebne tabele v bazi 'test'na 
+        naslovu /var/lib/mysql/
+
+        
+
+
+5. V bazi še ni naših tabel iz models.py za Reporter in Article. So samo splošne tabele za delovanje Djanga
+   z bazo mysql.Tabele ustvarimo tako, da v mysite/settings.py vnesemo našo aplikacijo "news" v :
+
+	 INSTALLED_APPS = (
+	    'django.contrib.admin',
+	    'django.contrib.auth',
+	    'django.contrib.contenttypes',
+	    'django.contrib.sessions',
+	    'django.contrib.messages',
+	    'django.contrib.staticfiles',
+	    'news',
+	)
+
+	Sedaj ponovno zaženemo : python manage.py syncdb  in generira potrebne tabeli Reporter in Article 
+        v bazi 'test'na  naslovu /var/lib/mysql/
+
+        zaženimo še :python manage.py sql news in bomo videli, da je kreirana baza
+
+6. Sedaj malo igračkanja v pythonu z uporabo API, ki ga poženemo s :python manage.py shell in smo v pythonu.
+        
+	# Import the models we created from our "news" app
+	>>> from news.models import Reporter, Article
+
+	# No reporters are in the system yet.
+	>>> Reporter.objects.all()
+	[]
+
+	# Create a new Reporter.
+	>>> r = Reporter(full_name='John Smith')
+
+	# Save the object into the database. You have to call save() explicitly.
+	>>> r.save()
+
+	# Now it has an ID.
+	>>> r.id
+	1
+
+	# Now the new reporter is in the database.
+	>>> Reporter.objects.all()
+	[<Reporter: John Smith>]
+
+	# Fields are represented as attributes on the Python object.
+	>>> r.full_name
+	'John Smith'
+
+	# Django provides a rich database lookup API.
+	>>> Reporter.objects.get(id=1)
+	<Reporter: John Smith>
+	>>> Reporter.objects.get(full_name__startswith='John')
+	<Reporter: John Smith>
+	>>> Reporter.objects.get(full_name__contains='mith')
+	<Reporter: John Smith>
+	>>> Reporter.objects.get(id=2)
+	Traceback (most recent call last):
+	    ...
+	DoesNotExist: Reporter matching query does not exist. Lookup parameters were {'id': 2}
+
+	# Create an article.
+	>>> from datetime import date
+	>>> a = Article(pub_date=date.today(), headline='Django is cool',
+	...     content='Yeah.', reporter=r)
+	>>> a.save()
+
+	# Now the article is in the database.
+	>>> Article.objects.all()
+	[<Article: Django is cool>]
+
+	# Article objects get API access to related Reporter objects.
+	>>> r = a.reporter
+	>>> r.full_name
+	'John Smith'
+
+	# And vice versa: Reporter objects get API access to Article objects.
+	>>> r.article_set.all()
+	[<Article: Django is cool>]
+
+	# The API follows relationships as far as you need, performing efficient
+	# JOINs for you behind the scenes.
+	# This finds all articles by a reporter whose name starts with "John".
+	>>> Article.objects.filter(reporter__full_name__startswith='John')
+	[<Article: Django is cool>]
+
+	# Change an object by altering its attributes and calling save().
+	>>> r.full_name = 'Billy Goat'
+	>>> r.save()
+
+	# Delete an object with delete().
+	>>> r.delete()
+
+7. Dynamic admin interface - ni samo oder, je cela hiša	
+	Enkrat, ko je models.py definiran lahko django uporabi profesionalni vmesnik, ki nam omogoča 
+	spreminjanje objektov.
+	Ta vmesnik za administracijo ni težko uporabiti.
+
+	V news/admin.py vnesemo :
+	import models
+	from django.contrib import admin
+
+	admin.site.register(models.Article)
+
+8. Design your URLs - nastavimo informacije za Web aplikacije. Za spletne aplikacije nudi Django čisto
+	in elegantno shemo brez navlake , ki jo imata PHP in asp.
+	
+9. Write your views  - v tem delu bomo kreirali poglede, ki jih bo django predstavil skozi URLs .
+	
+10.Design your templates
+
+	
+
+
+

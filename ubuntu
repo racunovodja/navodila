@@ -1,0 +1,106 @@
+informacije o hardware  lshw -short
+
+test internet : instaliraj pip install speedtest-cli in poženi speedtest-cli
+
+mysql -u root    	 vstop na vse nivoje
+
+iskanje fajlov   root@domserver:~# find / -iname 'test'
+
+cp -r ~/folder1/. ~/new_folder1  kopiranje direktorijev z vsebino
+
+sudo rm -rf /path/to/dir zbriše direktorij in fajle pod njim
+
+
+preverjanje hitrosti med dvema računalnikoma:
+na prvemu zaženemo : iperf -s na drugemu pa iperf -c 10.10.10.190  (to je naslov prvega)
+
+
+Podrobna pomoč za registrirane uporabnike je na https://help.ubuntu.com/community/
+
+Ukazi :
+
+splošni :
+
+DIREKTORIJ Z DVEMA BESEDAMA - ga vpišemo v navednice "MOJ DIREKTORIJ" in je ok.
+
+FORMATIRANJE USB DISKA
+
+Varianta 1 : s programom  Gparted tool
+
+sudo apt-get install gparted
+Varianta 1 : s Terminalom
+
+sudo -s
+fdisk -l   to see the usb flash drive suppose it may be /deb/sdb1
+umount /dev/sdb1umount /dev/sdb1
+mkfs.vfat /dev/sdb1  to format drive into fat32 format
+
+
+
+
+PRIPRAVA ZAGONSKEGA USB DISKA
+zaženi program startup disk creator in to je vse.
+pozor: pri starejših računalnikih mora biti USB formatiran na fat 16.
+
+UNZIPANJE tar.gz
+tar -vtzf ime
+
+DOWNLOAD
+http://prdownloads.sourceforge.net/webadmin/webmin-1.660-1.src.rpm    lokacija vsebine
+wget http://prdownloads.sourceforge.net/webadmin/webmin_1.660_all.deb  download fajla v tekoči
+direktorij
+Download v določen direktorij in v nov fajl z imenom test.tar.gz
+wget http://prdownloads.sourceforge.net/webadmin/webmin_1.660_all.deb -O /home/pavlovicr/Desktop/vaja/test.tar.gz
+Download fajlov , ki jih določim v seznamu tekstovne datoteke v gedit
+wget -i vaja   v vaji je seznam url fajlov za download
+DOWNLOAD 	YOUTUBE
+youtube-dl http://.......
+za pesmi iz seznama v gedit (v office mi ne deluje)
+youtube-dl -c --batch-file=/home/pavlovicr/Desktop/pesmice 
+samo audio
+youtube-dl --extract-audio http://www.youtube.com/watch?v=1PX37aP8TDQ
+samo audio iz seznama
+youtube-dl --extract-audio --batch-file=/home/pavlovicr/izbor
+za pesmi, ki jim shraniš samo bližnjice – streaming (dash) lahko video ali samo audio
+naprimer dash pod št. 139 pomeni streaming in to samo audio
+želeni format dobiš z youtube-dl -F http://.....
+youtube-dl -f 139 http://.....
+
+
+
+UPRAVLJANJE S PROGRAMI
+aptitude
+
+NALAGANJE DRAJVERJEV NAPRAV
+software-properties-gtk --open-tab=4
+
+
+NAJDI PODATKE O USB NAPRAVAH
+lsusb   osnovni
+lsusb -v  detajlni
+
+ROČNO NALAGANJE DRAJVERJA ZA USB- DVB-T
+0.0.1. General USB DVB-T na strani https://help.ubuntu.com/community/DVB-T_%28USB%29
+1. Identificiramo našo napravo in pogledamo , če podpira linux dvb-t (vl4)
+2.Če podpira , kopiraj firmvare za našo napravo v /lib/firmware/  s strani,  kjer so drajverji za našo napravo, v tem primeru za maxtor na http://linuxtv.org/downloads/firmware/dvb-usb-dib0700-1.20.fw
+gremo na /lib/firmware
+in downloadamo
+sudo wget http://linuxtv.org/downloads/firmware/dvb-usb-dib0700-1.20.fw
+
+
+3.gremo na naš delovni direktorij rados@domserver in zaženemo
+$ sudo apt-get install git linux-headers-$(uname -r) build-essential patchutils libproc-processtable-perl
+poženemo izvorno kodo 
+$ git clone git://linuxtv.org/media_build.git 
+Spremenimo direktorij , ki smo ga kreirali prej: 
+$ cd media_build 
+Compile the code (takes some time): 
+$ ./build 
+Install the compiled code: 
+sudo make install 
+Restart your system. 
+Now you can start kaffeine and it should automatically detect your DVB-T tuner.
+Pazi , da uporabiš še ukaz sudo , ker zahteva dovoljenje.
+
+
+

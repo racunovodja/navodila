@@ -1,0 +1,37 @@
+s SAMBO lahko delimo DIREKTORIJ (mapo) naprimer z imenom SHAREtudi v Windowsih ( omrežje, server/share)
+
+INSTALACIJA SAMBE :
+
+sudo apt-get install samba
+
+NASTAVITVE : V  /etc/samba/smb.conf: 
+
+workgroup = EXAMPLE
+   ...
+   security = user
+in na koncu fajla
+
+[share]
+    comment = Ubuntu File Server Share
+    path = /srv/samba/share
+    browsable = yes
+    guest ok = yes
+    read only = no
+    create mask = 0755
+
+KREIRAMO NOV DIREKTORIJ KI GA BOMO DELILI :
+
+sudo mkdir -p /srv/samba/share
+sudo chown nobody.nogroup /srv/samba/share/
+
+
+KONČNO RESTARTAMO SAMBO Z NOVIMI NASTAVITVAMI
+
+sudo restart smbd
+sudo restart nmbd (če nisem zagnal nmbd , ni delalo ok)
+
+in to je to ! 
+čE NE PRIDEŠ NA SAMBO IZ GRAFIČNEGA OKOLJA ODPRI TERMINAL IN VNESI :smbclient //server/share -U user
+
+
+
