@@ -1,0 +1,13 @@
+2. v failu VAJA/.git/config pa samo za ta direktorij
+
+
+komanda :
+$ git config --global user.name "pavlovicr"
+$ git config --global user.email pavlovicrados@gmail.com
+
+oziroma brez --global , ko gr samo za dir VAJA
+
+
+
+
+Git has a number of different transfer protocols you can use. The previous example uses the https:// protocol, but you may also see git:// or user@server:path/to/repo.git, which uses the SSH transfer protocol. “Getting Git on a Server” will introduce all of the available options the server can set up to access your Git repository and the pros and cons of each.
