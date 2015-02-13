@@ -22,3 +22,4 @@ med faili lahko hitro preklapljamo s puščico na komandi :
 
 
 
+ratatatatata
